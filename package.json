@@ -1,5 +1,5 @@
 {
-  "name": "airtable",
+  "name": "@dendronhq/airtable",
   "version": "0.11.1",
   "license": "MIT",
   "homepage": "https://github.com/airtable/airtable.js",
@@ -15,6 +15,7 @@
   },
   "dependencies": {
     "@types/node": ">=8.0.0 <15",
+    "@types/node-fetch": "^3.0.3",
     "abort-controller": "^3.0.0",
     "abortcontroller-polyfill": "^1.4.0",
     "lodash": "^4.17.21",
