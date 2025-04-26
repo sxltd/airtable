@@ -1,13 +1,16 @@
 require=(function(){function r(e,n,t){function o(i,f){if(!n[i]){if(!e[i]){var c="function"==typeof require&&require;if(!f&&c)return c(i,!0);if(u)return u(i,!0);var a=new Error("Cannot find module '"+i+"'");throw a.code="MODULE_NOT_FOUND",a}var p=n[i]={exports:{}};e[i][0].call(p.exports,function(r){var n=e[i][1][r];return o(n||r)},p,p.exports,r,e,n,t)}return n[i].exports}for(var u="function"==typeof require&&require,i=0;i<t.length;i++)o(t[i]);return o}return r})()({1:[function(require,module,exports){
 "use strict";
 // istanbul ignore file
-let AbortController;
+var AbortController;
 if (typeof window === 'undefined') {
     AbortController = require('abort-controller');
 }
+else if ('signal' in new Request('')) {
+    AbortController = window.AbortController;
+}
 else {
     /* eslint-disable @typescript-eslint/no-var-requires */
-    const polyfill = require('abortcontroller-polyfill/dist/cjs-ponyfill');
+    var polyfill = require('abortcontroller-polyfill/dist/cjs-ponyfill');
     /* eslint-enable @typescript-eslint/no-var-requires */
     AbortController = polyfill.AbortController;
 }
@@ -15,88 +18,99 @@ module.exports = AbortController;
 
 },{"abort-controller":20,"abortcontroller-polyfill/dist/cjs-ponyfill":19}],2:[function(require,module,exports){
 "use strict";
-class AirtableError {
-    constructor(error, message, statusCode) {
+var AirtableError = /** @class */ (function () {
+    function AirtableError(error, message, statusCode) {
         this.error = error;
         this.message = message;
         this.statusCode = statusCode;
     }
-    toString() {
+    AirtableError.prototype.toString = function () {
         return [
             this.message,
             '(',
             this.error,
             ')',
-            this.statusCode ? `[Http code ${this.statusCode}]` : '',
+            this.statusCode ? "[Http code " + this.statusCode + "]" : '',
         ].join('');
-    }
-}
+    };
+    return AirtableError;
+}());
 module.exports = AirtableError;
 
 },{}],3:[function(require,module,exports){
 "use strict";
+var __assign = (this && this.__assign) || function () {
+    __assign = Object.assign || function(t) {
+        for (var s, i = 1, n = arguments.length; i < n; i++) {
+            s = arguments[i];
+            for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p))
+                t[p] = s[p];
+        }
+        return t;
+    };
+    return __assign.apply(this, arguments);
+};
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
-const get_1 = __importDefault(require("lodash/get"));
-const isPlainObject_1 = __importDefault(require("lodash/isPlainObject"));
-const keys_1 = __importDefault(require("lodash/keys"));
-const fetch_1 = __importDefault(require("./fetch"));
-const abort_controller_1 = __importDefault(require("./abort-controller"));
-const object_to_query_param_string_1 = __importDefault(require("./object_to_query_param_string"));
-const airtable_error_1 = __importDefault(require("./airtable_error"));
-const table_1 = __importDefault(require("./table"));
-const http_headers_1 = __importDefault(require("./http_headers"));
-const run_action_1 = __importDefault(require("./run_action"));
-const package_version_1 = __importDefault(require("./package_version"));
-const exponential_backoff_with_jitter_1 = __importDefault(require("./exponential_backoff_with_jitter"));
-const userAgent = `Airtable.js/${package_version_1.default}`;
-class Base {
-    constructor(airtable, baseId) {
+var get_1 = __importDefault(require("lodash/get"));
+var isPlainObject_1 = __importDefault(require("lodash/isPlainObject"));
+var keys_1 = __importDefault(require("lodash/keys"));
+var fetch_1 = __importDefault(require("./fetch"));
+var abort_controller_1 = __importDefault(require("./abort-controller"));
+var object_to_query_param_string_1 = __importDefault(require("./object_to_query_param_string"));
+var airtable_error_1 = __importDefault(require("./airtable_error"));
+var table_1 = __importDefault(require("./table"));
+var http_headers_1 = __importDefault(require("./http_headers"));
+var run_action_1 = __importDefault(require("./run_action"));
+var package_version_1 = __importDefault(require("./package_version"));
+var exponential_backoff_with_jitter_1 = __importDefault(require("./exponential_backoff_with_jitter"));
+var userAgent = "Airtable.js/" + package_version_1.default;
+var Base = /** @class */ (function () {
+    function Base(airtable, baseId) {
         this._airtable = airtable;
         this._id = baseId;
     }
-    table(tableName) {
+    Base.prototype.table = function (tableName) {
         return new table_1.default(this, null, tableName);
-    }
-    makeRequest(options = {}) {
+    };
+    Base.prototype.makeRequest = function (options) {
+        var _this = this;
         var _a;
-        const method = get_1.default(options, 'method', 'GET').toUpperCase();
-        const url = `${this._airtable._endpointUrl}/v${this._airtable._apiVersionMajor}/${this._id}${get_1.default(options, 'path', '/')}?${object_to_query_param_string_1.default(get_1.default(options, 'qs', {}))}`;
-        const controller = new abort_controller_1.default();
-        const headers = this._getRequestHeaders(Object.assign({}, this._airtable._customHeaders, (_a = options.headers) !== null && _a !== void 0 ? _a : {}));
-        const requestOptions = {
-            method,
-            headers,
+        if (options === void 0) { options = {}; }
+        var method = get_1.default(options, 'method', 'GET').toUpperCase();
+        var url = this._airtable._endpointUrl + "/v" + this._airtable._apiVersionMajor + "/" + this._id + get_1.default(options, 'path', '/') + "?" + object_to_query_param_string_1.default(get_1.default(options, 'qs', {}));
+        var controller = new abort_controller_1.default();
+        var headers = this._getRequestHeaders(Object.assign({}, this._airtable._customHeaders, (_a = options.headers) !== null && _a !== void 0 ? _a : {}));
+        var requestOptions = {
+            method: method,
+            headers: headers,
             signal: controller.signal,
         };
         if ('body' in options && _canRequestMethodIncludeBody(method)) {
             requestOptions.body = JSON.stringify(options.body);
         }
-        const timeout = setTimeout(() => {
+        var timeout = setTimeout(function () {
             controller.abort();
         }, this._airtable._requestTimeout);
-        return new Promise((resolve, reject) => {
+        return new Promise(function (resolve, reject) {
             fetch_1.default(url, requestOptions)
-                .then((resp) => {
+                .then(function (resp) {
                 clearTimeout(timeout);
-                if (resp.status === 429 && !this._airtable._noRetryIfRateLimited) {
-                    const numAttempts = get_1.default(options, '_numAttempts', 0);
-                    const backoffDelayMs = exponential_backoff_with_jitter_1.default(numAttempts);
-                    setTimeout(() => {
-                        const newOptions = {
-                            ...options,
-                            _numAttempts: numAttempts + 1,
-                        };
-                        this.makeRequest(newOptions)
+                if (resp.status === 429 && !_this._airtable._noRetryIfRateLimited) {
+                    var numAttempts_1 = get_1.default(options, '_numAttempts', 0);
+                    var backoffDelayMs = exponential_backoff_with_jitter_1.default(numAttempts_1);
+                    setTimeout(function () {
+                        var newOptions = __assign(__assign({}, options), { _numAttempts: numAttempts_1 + 1 });
+                        _this.makeRequest(newOptions)
                             .then(resolve)
                             .catch(reject);
                     }, backoffDelayMs);
                 }
                 else {
                     resp.json()
-                        .then(body => {
-                        const err = this._checkStatusForError(resp.status, body) ||
+                        .then(function (body) {
+                        var err = _this._checkStatusForError(resp.status, body) ||
                             _getErrorForNonObjectBody(resp.status, body);
                         if (err) {
                             reject(err);
@@ -105,42 +119,43 @@ class Base {
                             resolve({
                                 statusCode: resp.status,
                                 headers: resp.headers,
-                                body,
+                                body: body,
                             });
                         }
                     })
-                        .catch(() => {
-                        const err = _getErrorForNonObjectBody(resp.status);
+                        .catch(function () {
+                        var err = _getErrorForNonObjectBody(resp.status);
                         reject(err);
                     });
                 }
             })
-                .catch(err => {
+                .catch(function (err) {
                 clearTimeout(timeout);
                 err = new airtable_error_1.default('CONNECTION_ERROR', err.message, null);
                 reject(err);
             });
         });
-    }
+    };
     /**
      * @deprecated This method is deprecated.
      */
-    runAction(method, path, queryParams, bodyData, callback) {
+    Base.prototype.runAction = function (method, path, queryParams, bodyData, callback) {
         run_action_1.default(this, method, path, queryParams, bodyData, callback, 0);
-    }
-    _getRequestHeaders(headers) {
-        const result = new http_headers_1.default();
-        result.set('Authorization', `Bearer ${this._airtable._apiKey}`);
+    };
+    Base.prototype._getRequestHeaders = function (headers) {
+        var result = new http_headers_1.default();
+        result.set('Authorization', "Bearer " + this._airtable._apiKey);
         result.set('User-Agent', userAgent);
         result.set('Content-Type', 'application/json');
-        for (const headerKey of keys_1.default(headers)) {
+        for (var _i = 0, _a = keys_1.default(headers); _i < _a.length; _i++) {
+            var headerKey = _a[_i];
             result.set(headerKey, headers[headerKey]);
         }
         return result.toJSON();
-    }
-    _checkStatusForError(statusCode, body) {
-        const { error = {} } = body !== null && body !== void 0 ? body : { error: {} };
-        const { type, message } = error;
+    };
+    Base.prototype._checkStatusForError = function (statusCode, body) {
+        var _a = (body !== null && body !== void 0 ? body : { error: {} }).error, error = _a === void 0 ? {} : _a;
+        var type = error.type, message = error.message;
         if (statusCode === 401) {
             return new airtable_error_1.default('AUTHENTICATION_REQUIRED', 'You should provide valid api key to perform this operation', statusCode);
         }
@@ -171,16 +186,16 @@ class Base {
         else {
             return null;
         }
-    }
-    doCall(tableName) {
+    };
+    Base.prototype.doCall = function (tableName) {
         return this.table(tableName);
-    }
-    getId() {
+    };
+    Base.prototype.getId = function () {
         return this._id;
-    }
-    static createFunctor(airtable, baseId) {
-        const base = new Base(airtable, baseId);
-        const baseFn = (tableName) => {
+    };
+    Base.createFunctor = function (airtable, baseId) {
+        var base = new Base(airtable, baseId);
+        var baseFn = function (tableName) {
             return base.doCall(tableName);
         };
         baseFn._base = base;
@@ -189,8 +204,9 @@ class Base {
         baseFn.runAction = base.runAction.bind(base);
         baseFn.getId = base.getId.bind(base);
         return baseFn;
-    }
-}
+    };
+    return Base;
+}());
 function _canRequestMethodIncludeBody(method) {
     return method !== 'GET' && method !== 'DELETE';
 }
@@ -213,10 +229,15 @@ module.exports = Base;
  * function will return a promise instead.
  */
 /* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/explicit-module-boundary-types */
-function callbackToPromise(fn, context, callbackArgIndex = void 0) {
+function callbackToPromise(fn, context, callbackArgIndex) {
+    if (callbackArgIndex === void 0) { callbackArgIndex = void 0; }
     /* eslint-enable @typescript-eslint/no-explicit-any, @typescript-eslint/explicit-module-boundary-types */
-    return function (...callArgs) {
-        let thisCallbackArgIndex;
+    return function () {
+        var callArgs = [];
+        for (var _i = 0; _i < arguments.length; _i++) {
+            callArgs[_i] = arguments[_i];
+        }
+        var thisCallbackArgIndex;
         if (callbackArgIndex === void 0) {
             // istanbul ignore next
             thisCallbackArgIndex = callArgs.length > 0 ? callArgs.length - 1 : 0;
@@ -224,22 +245,22 @@ function callbackToPromise(fn, context, callbackArgIndex = void 0) {
         else {
             thisCallbackArgIndex = callbackArgIndex;
         }
-        const callbackArg = callArgs[thisCallbackArgIndex];
+        var callbackArg = callArgs[thisCallbackArgIndex];
         if (typeof callbackArg === 'function') {
             fn.apply(context, callArgs);
             return void 0;
         }
         else {
-            const args = [];
+            var args_1 = [];
             // If an explicit callbackArgIndex is set, but the function is called
             // with too few arguments, we want to push undefined onto args so that
             // our constructed callback ends up at the right index.
-            const argLen = Math.max(callArgs.length, thisCallbackArgIndex);
-            for (let i = 0; i < argLen; i++) {
-                args.push(callArgs[i]);
+            var argLen = Math.max(callArgs.length, thisCallbackArgIndex);
+            for (var i = 0; i < argLen; i++) {
+                args_1.push(callArgs[i]);
             }
-            return new Promise((resolve, reject) => {
-                args.push((err, result) => {
+            return new Promise(function (resolve, reject) {
+                args_1.push(function (err, result) {
                     if (err) {
                         reject(err);
                     }
@@ -247,7 +268,7 @@ function callbackToPromise(fn, context, callbackArgIndex = void 0) {
                         resolve(result);
                     }
                 });
-                fn.apply(context, args);
+                fn.apply(context, args_1);
             });
         }
     };
@@ -256,7 +277,7 @@ module.exports = callbackToPromise;
 
 },{}],5:[function(require,module,exports){
 "use strict";
-const didWarnForDeprecation = {};
+var didWarnForDeprecation = {};
 /**
  * Convenience function for marking a function as deprecated.
  *
@@ -269,7 +290,11 @@ const didWarnForDeprecation = {};
  * @return a wrapped function
  */
 function deprecate(fn, key, message) {
-    return function (...args) {
+    return function () {
+        var args = [];
+        for (var _i = 0; _i < arguments.length; _i++) {
+            args[_i] = arguments[_i];
+        }
         if (!didWarnForDeprecation[key]) {
             didWarnForDeprecation[key] = true;
             console.warn(message);
@@ -284,12 +309,12 @@ module.exports = deprecate;
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
-const internal_config_json_1 = __importDefault(require("./internal_config.json"));
+var internal_config_json_1 = __importDefault(require("./internal_config.json"));
 // "Full Jitter" algorithm taken from https://aws.amazon.com/blogs/architecture/exponential-backoff-and-jitter/
 function exponentialBackoffWithJitter(numberOfRetries) {
-    const rawBackoffTimeMs = internal_config_json_1.default.INITIAL_RETRY_DELAY_IF_RATE_LIMITED * 2 ** numberOfRetries;
-    const clippedBackoffTimeMs = Math.min(internal_config_json_1.default.MAX_RETRY_DELAY_IF_RATE_LIMITED, rawBackoffTimeMs);
-    const jitteredBackoffTimeMs = Math.random() * clippedBackoffTimeMs;
+    var rawBackoffTimeMs = internal_config_json_1.default.INITIAL_RETRY_DELAY_IF_RATE_LIMITED * Math.pow(2, numberOfRetries);
+    var clippedBackoffTimeMs = Math.min(internal_config_json_1.default.MAX_RETRY_DELAY_IF_RATE_LIMITED, rawBackoffTimeMs);
+    var jitteredBackoffTimeMs = Math.random() * clippedBackoffTimeMs;
     return jitteredBackoffTimeMs;
 }
 module.exports = exponentialBackoffWithJitter;
@@ -300,8 +325,8 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 // istanbul ignore file
-const node_fetch_1 = __importDefault(require("node-fetch"));
-module.exports = typeof window === 'undefined' ? node_fetch_1.default : window.fetch = node_fetch_1.default;
+var node_fetch_1 = __importDefault(require("node-fetch"));
+module.exports = typeof window === 'undefined' ? node_fetch_1.default : window.fetch.bind(window);
 
 },{"node-fetch":20}],8:[function(require,module,exports){
 "use strict";
@@ -316,28 +341,29 @@ module.exports = has;
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
-const keys_1 = __importDefault(require("lodash/keys"));
-const isBrowser = typeof window !== 'undefined';
-class HttpHeaders {
-    constructor() {
+var keys_1 = __importDefault(require("lodash/keys"));
+var isBrowser = typeof window !== 'undefined';
+var HttpHeaders = /** @class */ (function () {
+    function HttpHeaders() {
         this._headersByLowercasedKey = {};
     }
-    set(headerKey, headerValue) {
-        let lowercasedKey = headerKey.toLowerCase();
+    HttpHeaders.prototype.set = function (headerKey, headerValue) {
+        var lowercasedKey = headerKey.toLowerCase();
         if (lowercasedKey === 'x-airtable-user-agent') {
             lowercasedKey = 'user-agent';
             headerKey = 'User-Agent';
         }
         this._headersByLowercasedKey[lowercasedKey] = {
-            headerKey,
-            headerValue,
+            headerKey: headerKey,
+            headerValue: headerValue,
         };
-    }
-    toJSON() {
-        const result = {};
-        for (const lowercasedKey of keys_1.default(this._headersByLowercasedKey)) {
-            const headerDefinition = this._headersByLowercasedKey[lowercasedKey];
-            let headerKey;
+    };
+    HttpHeaders.prototype.toJSON = function () {
+        var result = {};
+        for (var _i = 0, _a = keys_1.default(this._headersByLowercasedKey); _i < _a.length; _i++) {
+            var lowercasedKey = _a[_i];
+            var headerDefinition = this._headersByLowercasedKey[lowercasedKey];
+            var headerKey = void 0;
             /* istanbul ignore next */
             if (isBrowser && lowercasedKey === 'user-agent') {
                 // Some browsers do not allow overriding the user agent.
@@ -350,8 +376,9 @@ class HttpHeaders {
             result[headerKey] = headerDefinition.headerValue;
         }
         return result;
-    }
-}
+    };
+    return HttpHeaders;
+}());
 module.exports = HttpHeaders;
 
 },{"lodash/keys":92}],10:[function(require,module,exports){
@@ -365,32 +392,33 @@ module.exports={
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
-const isArray_1 = __importDefault(require("lodash/isArray"));
-const isNil_1 = __importDefault(require("lodash/isNil"));
-const keys_1 = __importDefault(require("lodash/keys"));
+var isArray_1 = __importDefault(require("lodash/isArray"));
+var isNil_1 = __importDefault(require("lodash/isNil"));
+var keys_1 = __importDefault(require("lodash/keys"));
 /* eslint-enable @typescript-eslint/no-explicit-any */
 // Adapted from jQuery.param:
 // https://github.com/jquery/jquery/blob/2.2-stable/src/serialize.js
 function buildParams(prefix, obj, addFn) {
     if (isArray_1.default(obj)) {
         // Serialize array item.
-        for (let index = 0; index < obj.length; index++) {
-            const value = obj[index];
+        for (var index = 0; index < obj.length; index++) {
+            var value = obj[index];
             if (/\[\]$/.test(prefix)) {
                 // Treat each array item as a scalar.
                 addFn(prefix, value);
             }
             else {
                 // Item is non-scalar (array or object), encode its numeric index.
-                buildParams(`${prefix}[${typeof value === 'object' && value !== null ? index : ''}]`, value, addFn);
+                buildParams(prefix + "[" + (typeof value === 'object' && value !== null ? index : '') + "]", value, addFn);
             }
         }
     }
     else if (typeof obj === 'object') {
         // Serialize object item.
-        for (const key of keys_1.default(obj)) {
-            const value = obj[key];
-            buildParams(`${prefix}[${key}]`, value, addFn);
+        for (var _i = 0, _a = keys_1.default(obj); _i < _a.length; _i++) {
+            var key = _a[_i];
+            var value = obj[key];
+            buildParams(prefix + "[" + key + "]", value, addFn);
         }
     }
     else {
@@ -399,13 +427,14 @@ function buildParams(prefix, obj, addFn) {
     }
 }
 function objectToQueryParamString(obj) {
-    const parts = [];
-    const addFn = (key, value) => {
+    var parts = [];
+    var addFn = function (key, value) {
         value = isNil_1.default(value) ? '' : value;
-        parts.push(`${encodeURIComponent(key)}=${encodeURIComponent(value)}`);
+        parts.push(encodeURIComponent(key) + "=" + encodeURIComponent(value));
     };
-    for (const key of keys_1.default(obj)) {
-        const value = obj[key];
+    for (var _i = 0, _a = keys_1.default(obj); _i < _a.length; _i++) {
+        var key = _a[_i];
+        var value = obj[key];
         buildParams(key, value, addFn);
     }
     return parts.join('&').replace(/%20/g, '+');
@@ -418,15 +447,26 @@ module.exports = "0.11.1";
 
 },{}],13:[function(require,module,exports){
 "use strict";
+var __assign = (this && this.__assign) || function () {
+    __assign = Object.assign || function(t) {
+        for (var s, i = 1, n = arguments.length; i < n; i++) {
+            s = arguments[i];
+            for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p))
+                t[p] = s[p];
+        }
+        return t;
+    };
+    return __assign.apply(this, arguments);
+};
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
-const isFunction_1 = __importDefault(require("lodash/isFunction"));
-const keys_1 = __importDefault(require("lodash/keys"));
-const record_1 = __importDefault(require("./record"));
-const callback_to_promise_1 = __importDefault(require("./callback_to_promise"));
-const has_1 = __importDefault(require("./has"));
-const query_params_1 = require("./query_params");
+var isFunction_1 = __importDefault(require("lodash/isFunction"));
+var keys_1 = __importDefault(require("lodash/keys"));
+var record_1 = __importDefault(require("./record"));
+var callback_to_promise_1 = __importDefault(require("./callback_to_promise"));
+var has_1 = __importDefault(require("./has"));
+var query_params_1 = require("./query_params");
 /**
  * Builds a query object. Won't fetch until `firstPage` or
  * or `eachPage` is called.
@@ -434,8 +474,8 @@ const query_params_1 = require("./query_params");
  * Params should be validated prior to being passed to Query
  * with `Query.validateParams`.
  */
-class Query {
-    constructor(table, params) {
+var Query = /** @class */ (function () {
+    function Query(table, params) {
         this._table = table;
         this._params = params;
         this.firstPage = callback_to_promise_1.default(firstPage, this);
@@ -452,15 +492,16 @@ class Query {
      *  ignoredKeys: a list of keys that will be ignored.
      *  errors: a list of error messages.
      */
-    static validateParams(params) {
-        const validParams = {};
-        const ignoredKeys = [];
-        const errors = [];
-        for (const key of keys_1.default(params)) {
-            const value = params[key];
+    Query.validateParams = function (params) {
+        var validParams = {};
+        var ignoredKeys = [];
+        var errors = [];
+        for (var _i = 0, _a = keys_1.default(params); _i < _a.length; _i++) {
+            var key = _a[_i];
+            var value = params[key];
             if (has_1.default(Query.paramValidators, key)) {
-                const validator = Query.paramValidators[key];
-                const validationResult = validator(value);
+                var validator = Query.paramValidators[key];
+                var validationResult = validator(value);
                 if (validationResult.pass) {
                     validParams[key] = value;
                 }
@@ -473,13 +514,14 @@ class Query {
             }
         }
         return {
-            validParams,
-            ignoredKeys,
-            errors,
+            validParams: validParams,
+            ignoredKeys: ignoredKeys,
+            errors: errors,
         };
-    }
-}
-Query.paramValidators = query_params_1.paramValidators;
+    };
+    Query.paramValidators = query_params_1.paramValidators;
+    return Query;
+}());
 /**
  * Fetches the first page of results for the query asynchronously,
  * then calls `done(error, records)`.
@@ -488,9 +530,9 @@ function firstPage(done) {
     if (!isFunction_1.default(done)) {
         throw new Error('The first parameter to `firstPage` must be a function');
     }
-    this.eachPage(records => {
+    this.eachPage(function (records) {
         done(null, records);
-    }, error => {
+    }, function (error) {
         done(error, null);
     });
 }
@@ -505,32 +547,33 @@ function firstPage(done) {
  * `done(error)`.
  */
 function eachPage(pageCallback, done) {
+    var _this = this;
     if (!isFunction_1.default(pageCallback)) {
         throw new Error('The first parameter to `eachPage` must be a function');
     }
     if (!isFunction_1.default(done) && done !== void 0) {
         throw new Error('The second parameter to `eachPage` must be a function or undefined');
     }
-    const path = `/${this._table._urlEncodedNameOrId()}`;
-    const params = { ...this._params };
-    const inner = () => {
-        this._table._base.runAction('get', path, params, null, (err, response, result) => {
+    var path = "/" + this._table._urlEncodedNameOrId();
+    var params = __assign({}, this._params);
+    var inner = function () {
+        _this._table._base.runAction('get', path, params, null, function (err, response, result) {
             if (err) {
                 done(err, null);
             }
             else {
-                let next;
+                var next = void 0;
                 if (result.offset) {
                     params.offset = result.offset;
                     next = inner;
                 }
                 else {
-                    next = () => {
+                    next = function () {
                         done(null);
                     };
                 }
-                const records = result.records.map(recordJson => {
-                    return new record_1.default(this._table, null, recordJson);
+                var records = result.records.map(function (recordJson) {
+                    return new record_1.default(_this._table, null, recordJson);
                 });
                 pageCallback(records, next);
             }
@@ -545,11 +588,11 @@ function all(done) {
     if (!isFunction_1.default(done)) {
         throw new Error('The first parameter to `all` must be a function');
     }
-    const allRecords = [];
-    this.eachPage((pageRecords, fetchNextPage) => {
-        allRecords.push(...pageRecords);
+    var allRecords = [];
+    this.eachPage(function (pageRecords, fetchNextPage) {
+        allRecords.push.apply(allRecords, pageRecords);
         fetchNextPage();
-    }, err => {
+    }, function (err) {
         if (err) {
             done(err, null);
         }
@@ -567,17 +610,17 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.paramValidators = void 0;
-const typecheck_1 = __importDefault(require("./typecheck"));
-const isString_1 = __importDefault(require("lodash/isString"));
-const isNumber_1 = __importDefault(require("lodash/isNumber"));
-const isPlainObject_1 = __importDefault(require("lodash/isPlainObject"));
+var typecheck_1 = __importDefault(require("./typecheck"));
+var isString_1 = __importDefault(require("lodash/isString"));
+var isNumber_1 = __importDefault(require("lodash/isNumber"));
+var isPlainObject_1 = __importDefault(require("lodash/isPlainObject"));
 exports.paramValidators = {
     fields: typecheck_1.default(typecheck_1.default.isArrayOf(isString_1.default), 'the value for `fields` should be an array of strings'),
     filterByFormula: typecheck_1.default(isString_1.default, 'the value for `filterByFormula` should be a string'),
     maxRecords: typecheck_1.default(isNumber_1.default, 'the value for `maxRecords` should be a number'),
     pageSize: typecheck_1.default(isNumber_1.default, 'the value for `pageSize` should be a number'),
     offset: typecheck_1.default(isNumber_1.default, 'the value for `offset` should be a number'),
-    sort: typecheck_1.default(typecheck_1.default.isArrayOf((obj) => {
+    sort: typecheck_1.default(typecheck_1.default.isArrayOf(function (obj) {
         return (isPlainObject_1.default(obj) &&
             isString_1.default(obj.field) &&
             (obj.direction === void 0 || ['asc', 'desc'].includes(obj.direction)));
@@ -585,7 +628,7 @@ exports.paramValidators = {
         'Each sort object must have a string `field` value, and an optional ' +
         '`direction` value that is "asc" or "desc".'),
     view: typecheck_1.default(isString_1.default, 'the value for `view` should be a string'),
-    cellFormat: typecheck_1.default((cellFormat) => {
+    cellFormat: typecheck_1.default(function (cellFormat) {
         return isString_1.default(cellFormat) && ['json', 'string'].includes(cellFormat);
     }, 'the value for `cellFormat` should be "json" or "string"'),
     timeZone: typecheck_1.default(isString_1.default, 'the value for `timeZone` should be a string'),
@@ -594,12 +637,23 @@ exports.paramValidators = {
 
 },{"./typecheck":18,"lodash/isNumber":85,"lodash/isPlainObject":88,"lodash/isString":89}],15:[function(require,module,exports){
 "use strict";
+var __assign = (this && this.__assign) || function () {
+    __assign = Object.assign || function(t) {
+        for (var s, i = 1, n = arguments.length; i < n; i++) {
+            s = arguments[i];
+            for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p))
+                t[p] = s[p];
+        }
+        return t;
+    };
+    return __assign.apply(this, arguments);
+};
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
-const callback_to_promise_1 = __importDefault(require("./callback_to_promise"));
-class Record {
-    constructor(table, recordId, recordJson) {
+var callback_to_promise_1 = __importDefault(require("./callback_to_promise"));
+var Record = /** @class */ (function () {
+    function Record(table, recordId, recordJson) {
         this._table = table;
         this.id = recordId || recordJson.id;
         this.setRawJson(recordJson);
@@ -611,76 +665,75 @@ class Record {
         this.updateFields = this.patchUpdate;
         this.replaceFields = this.putUpdate;
     }
-    getId() {
+    Record.prototype.getId = function () {
         return this.id;
-    }
-    get(columnName) {
+    };
+    Record.prototype.get = function (columnName) {
         return this.fields[columnName];
-    }
-    set(columnName, columnValue) {
+    };
+    Record.prototype.set = function (columnName, columnValue) {
         this.fields[columnName] = columnValue;
-    }
-    setRawJson(rawJson) {
+    };
+    Record.prototype.setRawJson = function (rawJson) {
         this._rawJson = rawJson;
         this.fields = (this._rawJson && this._rawJson.fields) || {};
-    }
-}
+    };
+    return Record;
+}());
 function save(done) {
     this.putUpdate(this.fields, done);
 }
 function patchUpdate(cellValuesByName, opts, done) {
+    var _this = this;
     if (!done) {
         done = opts;
         opts = {};
     }
-    const updateBody = {
-        fields: cellValuesByName,
-        ...opts,
-    };
-    this._table._base.runAction('patch', `/${this._table._urlEncodedNameOrId()}/${this.id}`, {}, updateBody, (err, response, results) => {
+    var updateBody = __assign({ fields: cellValuesByName }, opts);
+    this._table._base.runAction('patch', "/" + this._table._urlEncodedNameOrId() + "/" + this.id, {}, updateBody, function (err, response, results) {
         if (err) {
             done(err);
             return;
         }
-        this.setRawJson(results);
-        done(null, this);
+        _this.setRawJson(results);
+        done(null, _this);
     });
 }
 function putUpdate(cellValuesByName, opts, done) {
+    var _this = this;
     if (!done) {
         done = opts;
         opts = {};
     }
-    const updateBody = {
-        fields: cellValuesByName,
-        ...opts,
-    };
-    this._table._base.runAction('put', `/${this._table._urlEncodedNameOrId()}/${this.id}`, {}, updateBody, (err, response, results) => {
+    var updateBody = __assign({ fields: cellValuesByName }, opts);
+    this._table._base.runAction('put', "/" + this._table._urlEncodedNameOrId() + "/" + this.id, {}, updateBody, function (err, response, results) {
         if (err) {
             done(err);
             return;
         }
-        this.setRawJson(results);
-        done(null, this);
+        _this.setRawJson(results);
+        done(null, _this);
     });
 }
 function destroy(done) {
-    this._table._base.runAction('delete', `/${this._table._urlEncodedNameOrId()}/${this.id}`, {}, null, err => {
+    var _this = this;
+    this._table._base.runAction('delete', "/" + this._table._urlEncodedNameOrId() + "/" + this.id, {}, null, function (err) {
         if (err) {
             done(err);
             return;
         }
-        done(null, this);
+        done(null, _this);
     });
 }
 function fetch(done) {
-    this._table._base.runAction('get', `/${this._table._urlEncodedNameOrId()}/${this.id}`, {}, null, (err, response, results) => {
+    var _this = this;
+    this._table._base.runAction('get', "/" + this._table._urlEncodedNameOrId() + "/" + this.id, {}, null, function (err, response, results) {
         if (err) {
             done(err);
             return;
         }
-        this.setRawJson(results);
-        done(null, this);
+        _this.setRawJson(results);
+        done(null, _this);
     });
 }
 module.exports = Record;
@@ -690,21 +743,21 @@ module.exports = Record;
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
-const exponential_backoff_with_jitter_1 = __importDefault(require("./exponential_backoff_with_jitter"));
-const object_to_query_param_string_1 = __importDefault(require("./object_to_query_param_string"));
-const package_version_1 = __importDefault(require("./package_version"));
-const fetch_1 = __importDefault(require("./fetch"));
-const abort_controller_1 = __importDefault(require("./abort-controller"));
-const userAgent = `Airtable.js/${package_version_1.default}`;
+var exponential_backoff_with_jitter_1 = __importDefault(require("./exponential_backoff_with_jitter"));
+var object_to_query_param_string_1 = __importDefault(require("./object_to_query_param_string"));
+var package_version_1 = __importDefault(require("./package_version"));
+var fetch_1 = __importDefault(require("./fetch"));
+var abort_controller_1 = __importDefault(require("./abort-controller"));
+var userAgent = "Airtable.js/" + package_version_1.default;
 function runAction(base, method, path, queryParams, bodyData, callback, numAttempts) {
-    const url = `${base._airtable._endpointUrl}/v${base._airtable._apiVersionMajor}/${base._id}${path}?${object_to_query_param_string_1.default(queryParams)}`;
-    const headers = {
-        authorization: `Bearer ${base._airtable._apiKey}`,
+    var url = base._airtable._endpointUrl + "/v" + base._airtable._apiVersionMajor + "/" + base._id + path + "?" + object_to_query_param_string_1.default(queryParams);
+    var headers = {
+        authorization: "Bearer " + base._airtable._apiKey,
         'x-api-version': base._airtable._apiVersion,
         'x-airtable-application-id': base.getId(),
         'content-type': 'application/json',
     };
-    const isBrowser = typeof window !== 'undefined';
+    var isBrowser = typeof window !== 'undefined';
     // Some browsers do not allow overriding the user agent.
     // https://github.com/Airtable/airtable.js/issues/52
     if (isBrowser) {
@@ -713,11 +766,11 @@ function runAction(base, method, path, queryParams, bodyData, callback, numAttem
     else {
         headers['User-Agent'] = userAgent;
     }
-    const controller = new abort_controller_1.default();
-    const normalizedMethod = method.toUpperCase();
-    const options = {
+    var controller = new abort_controller_1.default();
+    var normalizedMethod = method.toUpperCase();
+    var options = {
         method: normalizedMethod,
-        headers,
+        headers: headers,
         signal: controller.signal,
     };
     if (bodyData !== null) {
@@ -728,26 +781,26 @@ function runAction(base, method, path, queryParams, bodyData, callback, numAttem
             options.body = JSON.stringify(bodyData);
         }
     }
-    const timeout = setTimeout(() => {
+    var timeout = setTimeout(function () {
         controller.abort();
     }, base._airtable._requestTimeout);
     fetch_1.default(url, options)
-        .then(resp => {
+        .then(function (resp) {
         clearTimeout(timeout);
         if (resp.status === 429 && !base._airtable._noRetryIfRateLimited) {
-            const backoffDelayMs = exponential_backoff_with_jitter_1.default(numAttempts);
-            setTimeout(() => {
+            var backoffDelayMs = exponential_backoff_with_jitter_1.default(numAttempts);
+            setTimeout(function () {
                 runAction(base, method, path, queryParams, bodyData, callback, numAttempts + 1);
             }, backoffDelayMs);
         }
         else {
             resp.json()
-                .then(body => {
-                const error = base._checkStatusForError(resp.status, body);
+                .then(function (body) {
+                var error = base._checkStatusForError(resp.status, body);
                 // Ensure Response interface matches interface from
                 // `request` Response object
-                const r = {};
-                Object.keys(resp).forEach(property => {
+                var r = {};
+                Object.keys(resp).forEach(function (property) {
                     r[property] = resp[property];
                 });
                 r.body = body;
@@ -759,7 +812,7 @@ function runAction(base, method, path, queryParams, bodyData, callback, numAttem
             });
         }
     })
-        .catch(error => {
+        .catch(function (error) {
         clearTimeout(timeout);
         callback(error);
     });
@@ -768,16 +821,27 @@ module.exports = runAction;
 
 },{"./abort-controller":1,"./exponential_backoff_with_jitter":6,"./fetch":7,"./object_to_query_param_string":11,"./package_version":12}],17:[function(require,module,exports){
 "use strict";
+var __assign = (this && this.__assign) || function () {
+    __assign = Object.assign || function(t) {
+        for (var s, i = 1, n = arguments.length; i < n; i++) {
+            s = arguments[i];
+            for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p))
+                t[p] = s[p];
+        }
+        return t;
+    };
+    return __assign.apply(this, arguments);
+};
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
-const isPlainObject_1 = __importDefault(require("lodash/isPlainObject"));
-const deprecate_1 = __importDefault(require("./deprecate"));
-const query_1 = __importDefault(require("./query"));
-const record_1 = __importDefault(require("./record"));
-const callback_to_promise_1 = __importDefault(require("./callback_to_promise"));
-class Table {
-    constructor(base, tableId, tableName) {
+var isPlainObject_1 = __importDefault(require("lodash/isPlainObject"));
+var deprecate_1 = __importDefault(require("./deprecate"));
+var query_1 = __importDefault(require("./query"));
+var record_1 = __importDefault(require("./record"));
+var callback_to_promise_1 = __importDefault(require("./callback_to_promise"));
+var Table = /** @class */ (function () {
+    function Table(base, tableId, tableName) {
         if (!tableId && !tableName) {
             throw new Error('Table name or table ID is required');
         }
@@ -795,92 +859,94 @@ class Table {
         this.list = deprecate_1.default(this._listRecords.bind(this), 'table.list', 'Airtable: `list()` is deprecated. Use `select()` instead.');
         this.forEach = deprecate_1.default(this._forEachRecord.bind(this), 'table.forEach', 'Airtable: `forEach()` is deprecated. Use `select()` instead.');
     }
-    _findRecordById(recordId, done) {
-        const record = new record_1.default(this, recordId);
+    Table.prototype._findRecordById = function (recordId, done) {
+        var record = new record_1.default(this, recordId);
         record.fetch(done);
-    }
-    _selectRecords(params) {
+    };
+    Table.prototype._selectRecords = function (params) {
         if (params === void 0) {
             params = {};
         }
         if (arguments.length > 1) {
-            console.warn(`Airtable: \`select\` takes only one parameter, but it was given ${arguments.length} parameters. Use \`eachPage\` or \`firstPage\` to fetch records.`);
+            console.warn("Airtable: `select` takes only one parameter, but it was given " + arguments.length + " parameters. Use `eachPage` or `firstPage` to fetch records.");
         }
         if (isPlainObject_1.default(params)) {
-            const validationResults = query_1.default.validateParams(params);
+            var validationResults = query_1.default.validateParams(params);
             if (validationResults.errors.length) {
-                const formattedErrors = validationResults.errors.map(error => {
-                    return `  * ${error}`;
+                var formattedErrors = validationResults.errors.map(function (error) {
+                    return "  * " + error;
                 });
-                throw new Error(`Airtable: invalid parameters for \`select\`:\n${formattedErrors.join('\n')}`);
+                throw new Error("Airtable: invalid parameters for `select`:\n" + formattedErrors.join('\n'));
             }
             if (validationResults.ignoredKeys.length) {
-                console.warn(`Airtable: the following parameters to \`select\` will be ignored: ${validationResults.ignoredKeys.join(', ')}`);
+                console.warn("Airtable: the following parameters to `select` will be ignored: " + validationResults.ignoredKeys.join(', '));
             }
             return new query_1.default(this, validationResults.validParams);
         }
         else {
             throw new Error('Airtable: the parameter for `select` should be a plain object or undefined.');
         }
-    }
-    _urlEncodedNameOrId() {
+    };
+    Table.prototype._urlEncodedNameOrId = function () {
         return this.id || encodeURIComponent(this.name);
-    }
-    _createRecords(recordsData, optionalParameters, done) {
-        const isCreatingMultipleRecords = Array.isArray(recordsData);
+    };
+    Table.prototype._createRecords = function (recordsData, optionalParameters, done) {
+        var _this = this;
+        var isCreatingMultipleRecords = Array.isArray(recordsData);
         if (!done) {
             done = optionalParameters;
             optionalParameters = {};
         }
-        let requestData;
+        var requestData;
         if (isCreatingMultipleRecords) {
-            requestData = { records: recordsData, ...optionalParameters };
+            requestData = __assign({ records: recordsData }, optionalParameters);
         }
         else {
-            requestData = { fields: recordsData, ...optionalParameters };
+            requestData = __assign({ fields: recordsData }, optionalParameters);
         }
-        this._base.runAction('post', `/${this._urlEncodedNameOrId()}/`, {}, requestData, (err, resp, body) => {
+        this._base.runAction('post', "/" + this._urlEncodedNameOrId() + "/", {}, requestData, function (err, resp, body) {
             if (err) {
                 done(err);
                 return;
             }
-            let result;
+            var result;
             if (isCreatingMultipleRecords) {
-                result = body.records.map(record => {
-                    return new record_1.default(this, record.id, record);
+                result = body.records.map(function (record) {
+                    return new record_1.default(_this, record.id, record);
                 });
             }
             else {
-                result = new record_1.default(this, body.id, body);
+                result = new record_1.default(_this, body.id, body);
             }
             done(null, result);
         });
-    }
-    _updateRecords(isDestructiveUpdate, recordsDataOrRecordId, recordDataOrOptsOrDone, optsOrDone, done) {
-        let opts;
+    };
+    Table.prototype._updateRecords = function (isDestructiveUpdate, recordsDataOrRecordId, recordDataOrOptsOrDone, optsOrDone, done) {
+        var _this = this;
+        var opts;
         if (Array.isArray(recordsDataOrRecordId)) {
-            const recordsData = recordsDataOrRecordId;
+            var recordsData = recordsDataOrRecordId;
             opts = isPlainObject_1.default(recordDataOrOptsOrDone) ? recordDataOrOptsOrDone : {};
             done = (optsOrDone || recordDataOrOptsOrDone);
-            const method = isDestructiveUpdate ? 'put' : 'patch';
-            const requestData = { records: recordsData, ...opts };
-            this._base.runAction(method, `/${this._urlEncodedNameOrId()}/`, {}, requestData, (err, resp, body) => {
+            var method = isDestructiveUpdate ? 'put' : 'patch';
+            var requestData = __assign({ records: recordsData }, opts);
+            this._base.runAction(method, "/" + this._urlEncodedNameOrId() + "/", {}, requestData, function (err, resp, body) {
                 if (err) {
                     done(err);
                     return;
                 }
-                const result = body.records.map(record => {
-                    return new record_1.default(this, record.id, record);
+                var result = body.records.map(function (record) {
+                    return new record_1.default(_this, record.id, record);
                 });
                 done(null, result);
             });
         }
         else {
-            const recordId = recordsDataOrRecordId;
-            const recordData = recordDataOrOptsOrDone;
+            var recordId = recordsDataOrRecordId;
+            var recordData = recordDataOrOptsOrDone;
             opts = isPlainObject_1.default(optsOrDone) ? optsOrDone : {};
             done = (done || optsOrDone);
-            const record = new record_1.default(this, recordId);
+            var record = new record_1.default(this, recordId);
             if (isDestructiveUpdate) {
                 record.putUpdate(recordData, opts, done);
             }
@@ -888,62 +954,63 @@ class Table {
                 record.patchUpdate(recordData, opts, done);
             }
         }
-    }
-    _destroyRecord(recordIdsOrId, done) {
+    };
+    Table.prototype._destroyRecord = function (recordIdsOrId, done) {
+        var _this = this;
         if (Array.isArray(recordIdsOrId)) {
-            const queryParams = { records: recordIdsOrId };
-            this._base.runAction('delete', `/${this._urlEncodedNameOrId()}`, queryParams, null, (err, response, results) => {
+            var queryParams = { records: recordIdsOrId };
+            this._base.runAction('delete', "/" + this._urlEncodedNameOrId(), queryParams, null, function (err, response, results) {
                 if (err) {
                     done(err);
                     return;
                 }
-                const records = results.records.map(({ id }) => {
-                    return new record_1.default(this, id, null);
+                var records = results.records.map(function (_a) {
+                    var id = _a.id;
+                    return new record_1.default(_this, id, null);
                 });
                 done(null, records);
             });
         }
         else {
-            const record = new record_1.default(this, recordIdsOrId);
+            var record = new record_1.default(this, recordIdsOrId);
             record.destroy(done);
         }
-    }
-    _listRecords(limit, offset, opts, done) {
+    };
+    Table.prototype._listRecords = function (limit, offset, opts, done) {
+        var _this = this;
         if (!done) {
             done = opts;
             opts = {};
         }
-        const listRecordsParameters = {
-            limit,
-            offset,
-            ...opts,
-        };
-        this._base.runAction('get', `/${this._urlEncodedNameOrId()}/`, listRecordsParameters, null, (err, response, results) => {
+        var listRecordsParameters = __assign({ limit: limit,
+            offset: offset }, opts);
+        this._base.runAction('get', "/" + this._urlEncodedNameOrId() + "/", listRecordsParameters, null, function (err, response, results) {
             if (err) {
                 done(err);
                 return;
             }
-            const records = results.records.map(recordJson => {
-                return new record_1.default(this, null, recordJson);
+            var records = results.records.map(function (recordJson) {
+                return new record_1.default(_this, null, recordJson);
             });
             done(null, records, results.offset);
         });
-    }
-    _forEachRecord(opts, callback, done) {
+    };
+    Table.prototype._forEachRecord = function (opts, callback, done) {
+        var _this = this;
         if (arguments.length === 2) {
             done = callback;
             callback = opts;
             opts = {};
         }
-        const limit = Table.__recordsPerPageForIteration || 100;
-        let offset = null;
-        const nextPage = () => {
-            this._listRecords(limit, offset, opts, (err, page, newOffset) => {
+        var limit = Table.__recordsPerPageForIteration || 100;
+        var offset = null;
+        var nextPage = function () {
+            _this._listRecords(limit, offset, opts, function (err, page, newOffset) {
                 if (err) {
                     done(err);
                     return;
                 }
-                for (let index = 0; index < page.length; index++) {
+                for (var index = 0; index < page.length; index++) {
                     callback(page[index]);
                 }
                 if (newOffset) {
@@ -956,8 +1023,9 @@ class Table {
             });
         };
         nextPage();
-    }
-}
+    };
+    return Table;
+}());
 module.exports = Table;
 
 },{"./callback_to_promise":4,"./deprecate":5,"./query":13,"./record":15,"lodash/isPlainObject":88}],18:[function(require,module,exports){
@@ -1041,19 +1109,6 @@ function _setPrototypeOf(o, p) {
   return _setPrototypeOf(o, p);
 }
 
-function _isNativeReflectConstruct() {
-  if (typeof Reflect === "undefined" || !Reflect.construct) return false;
-  if (Reflect.construct.sham) return false;
-  if (typeof Proxy === "function") return true;
-
-  try {
-    Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function () {}));
-    return true;
-  } catch (e) {
-    return false;
-  }
-}
-
 function _assertThisInitialized(self) {
   if (self === void 0) {
     throw new ReferenceError("this hasn't been initialised - super() hasn't been called");
@@ -1068,25 +1123,6 @@ function _possibleConstructorReturn(self, call) {
   }
 
   return _assertThisInitialized(self);
-}
-
-function _createSuper(Derived) {
-  var hasNativeReflectConstruct = _isNativeReflectConstruct();
-
-  return function _createSuperInternal() {
-    var Super = _getPrototypeOf(Derived),
-        result;
-
-    if (hasNativeReflectConstruct) {
-      var NewTarget = _getPrototypeOf(this).constructor;
-
-      result = Reflect.construct(Super, arguments, NewTarget);
-    } else {
-      result = Super.apply(this, arguments);
-    }
-
-    return _possibleConstructorReturn(this, result);
-  };
 }
 
 function _superPropBase(object, property) {
@@ -1119,7 +1155,9 @@ function _get(target, property, receiver) {
   return _get(target, property, receiver || target);
 }
 
-var Emitter = /*#__PURE__*/function () {
+var Emitter =
+/*#__PURE__*/
+function () {
   function Emitter() {
     _classCallCheck(this, Emitter);
 
@@ -1132,15 +1170,12 @@ var Emitter = /*#__PURE__*/function () {
 
   _createClass(Emitter, [{
     key: "addEventListener",
-    value: function addEventListener(type, callback, options) {
+    value: function addEventListener(type, callback) {
       if (!(type in this.listeners)) {
         this.listeners[type] = [];
       }
 
-      this.listeners[type].push({
-        callback: callback,
-        options: options
-      });
+      this.listeners[type].push(callback);
     }
   }, {
     key: "removeEventListener",
@@ -1152,7 +1187,7 @@ var Emitter = /*#__PURE__*/function () {
       var stack = this.listeners[type];
 
       for (var i = 0, l = stack.length; i < l; i++) {
-        if (stack[i].callback === callback) {
+        if (stack[i] === callback) {
           stack.splice(i, 1);
           return;
         }
@@ -1161,27 +1196,22 @@ var Emitter = /*#__PURE__*/function () {
   }, {
     key: "dispatchEvent",
     value: function dispatchEvent(event) {
+      var _this = this;
+
       if (!(event.type in this.listeners)) {
         return;
       }
 
+      var debounce = function debounce(callback) {
+        setTimeout(function () {
+          return callback.call(_this, event);
+        });
+      };
+
       var stack = this.listeners[event.type];
-      var stackToCall = stack.slice();
 
-      for (var i = 0, l = stackToCall.length; i < l; i++) {
-        var listener = stackToCall[i];
-
-        try {
-          listener.callback.call(this, event);
-        } catch (e) {
-          Promise.resolve().then(function () {
-            throw e;
-          });
-        }
-
-        if (listener.options && listener.options.once) {
-          this.removeEventListener(event.type, listener.callback);
-        }
+      for (var i = 0, l = stack.length; i < l; i++) {
+        debounce(stack[i]);
       }
 
       return !event.defaultPrevented;
@@ -1191,40 +1221,40 @@ var Emitter = /*#__PURE__*/function () {
   return Emitter;
 }();
 
-var AbortSignal = /*#__PURE__*/function (_Emitter) {
+var AbortSignal =
+/*#__PURE__*/
+function (_Emitter) {
   _inherits(AbortSignal, _Emitter);
 
-  var _super = _createSuper(AbortSignal);
-
   function AbortSignal() {
-    var _this;
+    var _this2;
 
     _classCallCheck(this, AbortSignal);
 
-    _this = _super.call(this); // Some versions of babel does not transpile super() correctly for IE <= 10, if the parent
+    _this2 = _possibleConstructorReturn(this, _getPrototypeOf(AbortSignal).call(this)); // Some versions of babel does not transpile super() correctly for IE <= 10, if the parent
     // constructor has failed to run, then "this.listeners" will still be undefined and then we call
     // the parent constructor directly instead as a workaround. For general details, see babel bug:
     // https://github.com/babel/babel/issues/3041
     // This hack was added as a fix for the issue described here:
     // https://github.com/Financial-Times/polyfill-library/pull/59#issuecomment-477558042
 
-    if (!_this.listeners) {
-      Emitter.call(_assertThisInitialized(_this));
+    if (!_this2.listeners) {
+      Emitter.call(_assertThisInitialized(_this2));
     } // Compared to assignment, Object.defineProperty makes properties non-enumerable by default and
     // we want Object.keys(new AbortController().signal) to be [] for compat with the native impl
 
 
-    Object.defineProperty(_assertThisInitialized(_this), 'aborted', {
+    Object.defineProperty(_assertThisInitialized(_this2), 'aborted', {
       value: false,
       writable: true,
       configurable: true
     });
-    Object.defineProperty(_assertThisInitialized(_this), 'onabort', {
+    Object.defineProperty(_assertThisInitialized(_this2), 'onabort', {
       value: null,
       writable: true,
       configurable: true
     });
-    return _this;
+    return _this2;
   }
 
   _createClass(AbortSignal, [{
@@ -1249,7 +1279,9 @@ var AbortSignal = /*#__PURE__*/function (_Emitter) {
 
   return AbortSignal;
 }(Emitter);
-var AbortController = /*#__PURE__*/function () {
+var AbortController =
+/*#__PURE__*/
+function () {
   function AbortController() {
     _classCallCheck(this, AbortController);
 
@@ -2014,13 +2046,13 @@ var coreJsData = root['__core-js_shared__'];
 module.exports = coreJsData;
 
 },{"./_root":72}],40:[function(require,module,exports){
-(function (global){(function (){
+(function (global){
 /** Detect free variable `global` from Node.js. */
 var freeGlobal = typeof global == 'object' && global && global.Object === Object && global;
 
 module.exports = freeGlobal;
 
-}).call(this)}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
+}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
 },{}],41:[function(require,module,exports){
 var isKeyable = require('./_isKeyable');
 
@@ -3543,14 +3575,15 @@ module.exports = toString;
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
-const base_1 = __importDefault(require("./base"));
-const record_1 = __importDefault(require("./record"));
-const table_1 = __importDefault(require("./table"));
-const airtable_error_1 = __importDefault(require("./airtable_error"));
-class Airtable {
-    constructor(opts = {}) {
-        const defaultConfig = Airtable.default_config();
-        const apiVersion = opts.apiVersion || Airtable.apiVersion || defaultConfig.apiVersion;
+var base_1 = __importDefault(require("./base"));
+var record_1 = __importDefault(require("./record"));
+var table_1 = __importDefault(require("./table"));
+var airtable_error_1 = __importDefault(require("./airtable_error"));
+var Airtable = /** @class */ (function () {
+    function Airtable(opts) {
+        if (opts === void 0) { opts = {}; }
+        var defaultConfig = Airtable.default_config();
+        var apiVersion = opts.apiVersion || Airtable.apiVersion || defaultConfig.apiVersion;
         Object.defineProperties(this, {
             _apiKey: {
                 value: opts.apiKey || Airtable.apiKey || defaultConfig.apiKey,
@@ -3580,10 +3613,10 @@ class Airtable {
             throw new Error('An API key is required to connect to Airtable');
         }
     }
-    base(baseId) {
+    Airtable.prototype.base = function (baseId) {
         return base_1.default.createFunctor(this, baseId);
-    }
-    static default_config() {
+    };
+    Airtable.default_config = function () {
         return {
             endpointUrl: undefined || 'https://api.airtable.com',
             apiVersion: '0.1.0',
@@ -3591,22 +3624,24 @@ class Airtable {
             noRetryIfRateLimited: false,
             requestTimeout: 300 * 1000,
         };
-    }
-    static configure({ apiKey, endpointUrl, apiVersion, noRetryIfRateLimited, requestTimeout, }) {
+    };
+    Airtable.configure = function (_a) {
+        var apiKey = _a.apiKey, endpointUrl = _a.endpointUrl, apiVersion = _a.apiVersion, noRetryIfRateLimited = _a.noRetryIfRateLimited, requestTimeout = _a.requestTimeout;
         Airtable.apiKey = apiKey;
         Airtable.endpointUrl = endpointUrl;
         Airtable.apiVersion = apiVersion;
         Airtable.noRetryIfRateLimited = noRetryIfRateLimited;
         Airtable.requestTimeout = requestTimeout;
-    }
-    static base(baseId) {
+    };
+    Airtable.base = function (baseId) {
         return new Airtable().base(baseId);
-    }
-}
-Airtable.Base = base_1.default;
-Airtable.Record = record_1.default;
-Airtable.Table = table_1.default;
-Airtable.Error = airtable_error_1.default;
+    };
+    Airtable.Base = base_1.default;
+    Airtable.Record = record_1.default;
+    Airtable.Table = table_1.default;
+    Airtable.Error = airtable_error_1.default;
+    return Airtable;
+}());
 module.exports = Airtable;
 
 },{"./airtable_error":2,"./base":3,"./record":15,"./table":17}]},{},["airtable"]);
